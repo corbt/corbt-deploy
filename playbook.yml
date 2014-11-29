@@ -1,0 +1,45 @@
+---
+- hosts: corbt
+  user: core
+  sudo: true
+  gather_facts: false
+
+  # roles:
+  #   - defunctzombie.coreos-bootstrap
+
+  vars_files:
+    - vars/defaults.yml
+    - vars/secrets.yml
+
+  tasks:
+    - name: Create file structure
+      file: path={{item}} owner=core group=core state=directory
+      with_items:
+        - /srv/www/corbt
+        - /srv/www/corbt/downloads
+        - /srv/www/corbt/torrents
+        - /home/core/.transmission/config
+
+    - name: Install nginx-proxy
+      template: src=templates/nginx-proxy.service.j2 dest=/etc/systemd/system/nginx-proxy.service
+      notify: enable nginx-proxy
+
+    - name: Install transmission
+      template: src=templates/transmission.service.j2 dest=/etc/systemd/system/transmission.service
+      notify: enable transmission
+
+
+  handlers:
+    - name: enable nginx-proxy
+      command: "{{item}}"
+      with_items:
+        - systemctl enable /etc/systemd/system/nginx-proxy.service 
+        - systemctl daemon-reload 
+        - systemctl restart nginx-proxy.service
+
+    - name: enable transmission
+      command: "{{item}}"
+      with_items:
+        - systemctl enable /etc/systemd/system/transmission.service 
+        - systemctl daemon-reload 
+        - systemctl restart transmission.service

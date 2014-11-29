@@ -1,0 +1,14 @@
+[Unit]
+Description=Transmission torrent box
+After=nginx-proxy.service
+Requires=nginx-proxy.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill transmission
+ExecStartPre=-/usr/bin/docker rm transmission
+ExecStartPre=/usr/bin/docker pull corbt/transmission
+ExecStart=/usr/bin/docker run --name transmission -e USERNAME=kyle -e PASSWORD={{ transmission.password }} -e VIRTUAL_HOST=torrents.corbt.com -p 9091:9091 -v /srv/www/corbt/torrents:/downloads -v /home/core/.transmission/config:/config corbt/transmission
+
+[Install]
+WantedBy=multi-user.target
