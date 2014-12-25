@@ -1,0 +1,14 @@
+[Unit]
+Description=Transmission torrent box
+After=nginx-proxy.service
+Requires=nginx-proxy.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill seafile-server
+ExecStartPre=-/usr/bin/docker rm seafile-server
+ExecStartPre=/usr/bin/docker pull corbt/seafile-server
+ExecStart=/usr/bin/docker run --name seafile-server -e VIRTUAL_HOST=sf.corbt.com -v /srv/www/corbt/torrents:/downloads -v /home/deploy/.seafile-server/config:/config corbt/seafile-server
+
+[Install]
+WantedBy=multi-user.target

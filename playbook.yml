@@ -1,24 +1,62 @@
 ---
 - hosts: corbt
-  user: core
+  user: deploy
   sudo: true
   gather_facts: false
-
-  # roles:
-  #   - defunctzombie.coreos-bootstrap
 
   vars_files:
     - vars/defaults.yml
     - vars/secrets.yml
 
   tasks:
+    - name: Create deploy user
+      user: name=deploy shell=/bin/bash group=sudo
+      remote_user: root
+
+    - name: Authorize login as deploy user
+      authorized_key: 'user=deploy key="{{ lookup(''file'', ''/Users/kyle/.ssh/id_rsa.pub'') }}"'
+      remote_user: root
+
+    - name: Allow sudo without password
+      lineinfile: 
+        dest: /etc/sudoers 
+        line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+        regexp: "^%sudo"
+      remote_user: root
+
+    - name: Add systemd PPA
+      apt_repository: repo='ppa:pitti/systemd'
+
+    - name: Install necessary utilities
+      apt: name={{item}}
+      with_items:
+        - systemd
+        - libpam-systemd
+        - systemd-ui
+        - docker.io
+        - vim
+        - git
+
+    - name: Set systemd as default init
+      lineinfile:
+        dest: /etc/default/grub
+        line: GRUB_CMDLINE_LINUX_DEFAULT="quiet splash init=/lib/systemd/systemd"
+        regexp: "^GRUB_CMDLINE_LINUX_DEFAULT"
+      notify:
+        - reload grub
+        - reboot
+
+    - name: Set systemd mounts
+      file: src=/proc/self/mounts dest=/etc/mtab state=link
+
     - name: Create file structure
-      file: path={{item}} owner=core group=core state=directory
+      file: path={{item}} owner=deploy state=directory
       with_items:
         - /srv/www/corbt
         - /srv/www/corbt/downloads
         - /srv/www/corbt/torrents
-        - /home/core/.transmission/config
+        - /home/deploy/.transmission/config
+        - /etc/seafile/data
 
     - name: Install nginx-proxy
       template: src=templates/nginx-proxy.service.j2 dest=/etc/systemd/system/nginx-proxy.service
@@ -28,6 +66,15 @@
       template: src=templates/transmission.service.j2 dest=/etc/systemd/system/transmission.service
       notify: enable transmission
 
+    # - name: Install seafile-server
+    #   template: src=templates/seafile-server.service.j2 dest=/etc/systemd/system/seafile-server.service
+    #   notify: enable seafile-server
+
+    # - name: run handlers
+    #   file: dest=/tmp/test1 state=touch
+    #   notify:
+    #     - enable nginx-proxy
+    #     - enable transmission
 
   handlers:
     - name: enable nginx-proxy
@@ -43,3 +90,16 @@
         - systemctl enable /etc/systemd/system/transmission.service 
         - systemctl daemon-reload 
         - systemctl restart transmission.service
+
+    - name: reload grub
+      command: update-grub
+
+    - name: reboot
+      command: /sbin/reboot
+
+    # - name: enable seafile-server
+    #   command: "{{item}}"
+    #   with_items:
+    #     - systemctl enable /etc/systemd/system/seafile-server.service 
+    #     - systemctl daemon-reload 
+    #     - systemctl restart seafile-server.service
