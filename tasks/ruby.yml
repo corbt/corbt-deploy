@@ -1,0 +1,29 @@
+---
+- name: Install rbenv
+  command: git clone https://github.com/sstephenson/rbenv.git {{ rbenv.path }} creates={{ rbenv.path }}
+
+- name: Install dependencies for ruby-build
+  apt: pkg={{ item }}
+  with_items:
+    - autoconf
+    - bison
+    - build-essential
+    - libssl-dev
+    - libyaml-dev
+    - libreadline6
+    - libreadline6-dev
+    - zlib1g
+    - zlib1g-dev
+
+- name: Install ruby-build
+  command: git clone https://github.com/sstephenson/ruby-build.git {{ rbenv.path }}/plugins/ruby-build creates={{ rbenv.path }}/plugins/ruby-build
+
+# - name: Install ruby version {{ rbenv.version }}
+#   command: sudo -i rbenv install {{ rbenv.version }}
+#   sudo: false
+
+- name: set ruby default version
+  template: src=templates/ruby-version.j2 dest="{{ rbenv.path }}/version"
+
+- name: initialize rbenv
+  template: src=templates/rbenv.sh.j2 dest=/etc/profile.d/rbenv.sh mode=0755

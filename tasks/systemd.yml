@@ -1,0 +1,22 @@
+---
+- name: Add systemd PPA
+  apt_repository: repo='ppa:pitti/systemd'
+
+- name: Install necessary utilities
+  apt: name={{item}}
+  with_items:
+    - systemd
+    - libpam-systemd
+    - systemd-ui
+
+- name: Set systemd as default init
+  lineinfile:
+    dest: /etc/default/grub
+    line: GRUB_CMDLINE_LINUX_DEFAULT="quiet splash init=/lib/systemd/systemd"
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT"
+  notify:
+    - reload grub
+    - reboot
+
+- name: Set systemd mounts
+  file: src=/proc/self/mounts dest=/etc/mtab state=link

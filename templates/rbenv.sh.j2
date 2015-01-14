@@ -1,0 +1,9 @@
+export RBENV_ROOT={{ rbenv.path }}
+export PATH="$RBENV_ROOT/bin:$PATH"
+
+# Allow local Gem management
+# export GEM_HOME="$HOME/.gem"
+# export GEM_PATH="$HOME/.gem"
+# export PATH="$HOME/.gem/bin:$PATH"
+
+eval "$(rbenv init -)"

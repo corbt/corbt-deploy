@@ -1,2 +1,10 @@
 ---
-# ansible_python_interpreter: "PATH=/home/core/bin:$PATH python"
+domain: corbt.com
+
+rbenv:
+  version: 2.1.5
+  path: /usr/local/rbenv
+
+seafile:
+  dir: /srv/seafile
+  version: 4.0.3

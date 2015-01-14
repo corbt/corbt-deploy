@@ -1,0 +1,53 @@
+---
+- name: Install prerequisites
+  apt: name=python-pil state=installed
+
+- name: Create seafile user
+  user: name=seafile shell=/bin/bash
+
+- name: Create folder structure
+  file: name={{seafile.dir}}/{{item}} owner=seafile state=directory
+  with_items:
+    - installed
+
+- name: Download Seafile
+  get_url: 
+    url: https://bitbucket.org/haiwen/seafile/downloads/seafile-server_{{seafile.version}}_x86-64.tar.gz 
+    dest: "{{seafile.dir}}/installed"
+  sudo_user: seafile
+
+- name: Extract Seafile
+  command: tar --directory {{seafile.dir}} -xzf {{seafile.dir}}/installed/seafile-server_{{seafile.version}}_x86-64.tar.gz
+  args:
+    creates: "{{seafile.dir}}/seafile-server-{{seafile.version}}"
+  sudo_user: seafile
+
+- name: Symlink latest seafile
+  file: dest={{seafile.dir}}/seafile-server-latest src={{seafile.dir}}/seafile-server-{{seafile.version}} state=link
+  sudo_user: seafile
+
+- name: Place seafile SSL certificates
+  copy: src={{item}} dest=/etc/nginx/ssl/{{item}} owner=root group=root
+  with_items:
+    - sf.corbt.com.crt
+    - sf.corbt.com.key
+  notify: restart nginx
+
+- name: Add seafile nginx conf
+  template: src=seafile-nginx.conf.j2 dest=/etc/nginx/sites-enabled/seafile.conf
+  notify: restart nginx
+
+# - name: Start seafile service
+
+# - name: enable seafile-server
+#   command: "{{item}}"
+#   with_items:
+#     - systemctl enable /etc/systemd/system/seafile-server.service 
+#     - systemctl daemon-reload 
+#     - systemctl restart seafile-server.service
+
+- name: Allow Seafile traffic through firewall
+  ufw: rule=allow port={{item}}
+  with_items:
+    - 10001
+    - 12001

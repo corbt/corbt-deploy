@@ -1,1 +1,2 @@
 vars/secrets.yml filter=git-crypt diff=git-crypt
+roles/seafile/files/sf.corbt.com.key filter=git-crypt diff=git-crypt

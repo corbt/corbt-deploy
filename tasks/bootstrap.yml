@@ -1,0 +1,37 @@
+---
+- hostname: name=corbt
+
+- name: Create deploy user
+  user: name=deploy group=deploy shell=/bin/bash groups=sudo
+  remote_user: root
+
+- name: Authorize login as deploy user
+  authorized_key: 'user=deploy key="{{ lookup(''file'', ''/Users/kyle/.ssh/id_rsa.pub'') }}"'
+  remote_user: root
+
+- name: Allow sudo without password
+  lineinfile: 
+    dest: /etc/sudoers 
+    line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+    regexp: "^%sudo"
+  remote_user: root
+
+- name: Install necessary utilities
+  apt: name={{item}}
+  with_items:
+    - docker.io
+    - vim
+    - git
+    - build-essential
+    - screen
+    - fail2ban
+    - ufw
+
+- name: Allow SSH traffic through firewall
+  ufw: rule=allow port=22
+
+- name: Enable firewall
+  ufw: state=enabled policy=deny
+
+- name: Activate fail2ban
+  command: cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local creates=/etc/fail2ban/jail.local
