@@ -1,6 +1,10 @@
 ---
 - hostname: name=corbt
 
+- name: Set local address in hosts
+  lineinfile: dest=/etc/hosts regexp='^127\.0\.1\.1' line='127.0.1.1 corbt' owner=root group=root mode=0644
+
+
 - name: Create deploy user
   user: name=deploy group=deploy shell=/bin/bash groups=sudo
   remote_user: root

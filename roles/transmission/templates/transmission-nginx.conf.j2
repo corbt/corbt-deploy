@@ -1,0 +1,15 @@
+server {
+  server_name torrents.corbt.com;
+  listen 80;
+
+  # root {{transmission.download_path}};
+
+  location / {
+    proxy_pass http://localhost:9091;
+  }
+
+  location /get {
+    autoindex on;
+    alias {{transmission.download_path}};
+  }
+}

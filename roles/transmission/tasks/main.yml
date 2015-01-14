@@ -1,0 +1,23 @@
+---
+- name: Add transmission PPA
+  apt_repository: repo='ppa:transmissionbt/ppa'
+
+- name: Install transmission
+  apt: name=transmission-daemon
+
+- name: Create transmission download directory
+  file: path={{transmission.download_path}} state=directory mode=777
+
+# - name: Stop transmission
+#   service: name=transmission-daemon state=stopped
+
+- name: Set transmission config
+  # template: src=settings.json.j2 dest=/etc/transmission-daemon/settings.json owner=debian-transmission group=debian-transmission
+  template: src=settings.json.j2 dest=/home/debian-transmission/.config/transmission-daemon/settings.json
+
+# - name: Start transmission
+#   service: name=transmission-daemon state=started
+
+- name: Copy transmission nginx config
+  template: src=transmission-nginx.conf.j2 dest=/etc/nginx/sites-enabled/transmission.conf
+  notify: restart nginx

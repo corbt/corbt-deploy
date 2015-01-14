@@ -37,14 +37,17 @@
   template: src=seafile-nginx.conf.j2 dest=/etc/nginx/sites-enabled/seafile.conf
   notify: restart nginx
 
-# - name: Start seafile service
+- name: Add Seafile and Seahub Systemd scripts
+  template: src={{item}}.j2 dest=/etc/systemd/system/{{item}}
+  with_items:
+    - seafile.service
+    - seahub.service
 
-# - name: enable seafile-server
-#   command: "{{item}}"
-#   with_items:
-#     - systemctl enable /etc/systemd/system/seafile-server.service 
-#     - systemctl daemon-reload 
-#     - systemctl restart seafile-server.service
+- name: Activate services
+  service: name={{item}} enabled=yes state=started
+  with_items:
+    - seafile.service
+    - seahub.service
 
 - name: Allow Seafile traffic through firewall
   ufw: rule=allow port={{item}}

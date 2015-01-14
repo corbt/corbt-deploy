@@ -10,6 +10,7 @@
 
   roles:
     - {role: seafile, tags: ['seafile']}
+    - {role: transmission, tags: ['transmission']}
 
   tasks:
     - include: tasks/bootstrap.yml tags=bootstrap
@@ -32,16 +33,6 @@
     - name: Install transmission
       template: src=templates/transmission.service.j2 dest=/etc/systemd/system/transmission.service
       notify: enable transmission
-
-    # - name: Install seafile-server
-    #   template: src=templates/seafile-server.service.j2 dest=/etc/systemd/system/seafile-server.service
-    #   notify: enable seafile-server
-
-    # - name: run handlers
-    #   file: dest=/tmp/test1 state=touch
-    #   notify:
-    #     - enable nginx-proxy
-    #     - enable transmission
 
   handlers:
     - name: restart nginx
