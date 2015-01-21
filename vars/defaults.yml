@@ -9,5 +9,5 @@ seafile:
   dir: /srv/seafile
   version: 4.0.3
 
-transmission:
-  download_path: /srv/torrents
+openvpn:
+  version: openvpn-as-2.0.12-Ubuntu14.amd_64

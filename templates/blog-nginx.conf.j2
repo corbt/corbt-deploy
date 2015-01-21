@@ -1,0 +1,18 @@
+server {
+  server_name corbt.com;
+  listen 80 default_server;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl default_server;
+  server_name  corbt.com;
+
+  ssl_certificate /etc/nginx/ssl/sf.corbt.com.crt;
+  ssl_certificate_key /etc/nginx/ssl/sf.corbt.com.key;
+
+  location / {
+    root /srv/www/corbt;
+  }
+
+}

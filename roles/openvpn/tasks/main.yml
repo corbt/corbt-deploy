@@ -1,0 +1,16 @@
+---
+- name: Download openvpn
+  get_url: url=http://swupdate.openvpn.org/as/{{openvpn.version}}.deb dest=/root/openvpn.deb force=no
+
+- name: Install openvpn
+  apt: deb=/root/openvpn.deb state=installed
+
+- name: Set the openvpn password
+  user: name=openvpn password={{openvpn_password}}
+
+- name: Render nginx template
+  template: src=openvpn-nginx.conf.j2 dest=/etc/nginx/sites-enabled/openvpn.conf
+  notify: restart nginx
+
+- name: Open the tunnel port
+  ufw: rule=allow proto=udp port=1194

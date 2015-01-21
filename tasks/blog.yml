@@ -1,0 +1,7 @@
+---
+- name: Create dir
+  file: path=/srv/www/corbt owner=deploy group=deploy state=directory
+
+- name: Render nginx template
+  template: src=templates/blog-nginx.conf.j2 dest=/etc/nginx/sites-enabled/blog.conf
+  notify: restart nginx

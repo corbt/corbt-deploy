@@ -1,0 +1,28 @@
+---
+- name: Add nginx ppa
+  apt_repository: repo='ppa:nginx/stable'
+
+- name: Install nginx
+  apt: name=nginx
+
+- name: Create ssl directory
+  file: dest=/etc/nginx/ssl state=directory
+
+- name: Place seafile/basic SSL certificates
+  copy: src={{item}} dest=/etc/nginx/ssl/{{item}} owner=root group=root mode=0400
+  with_items:
+    - sf.corbt.com.crt
+    - sf.corbt.com.key
+  notify: restart nginx
+
+# - name: Create self-signed SSL cert
+#   command: 'openssl req -new -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=IT/CN=*.{{domain}}" -days 3650 -keyout /etc/nginx/ssl/server.key -out /etc/nginx/ssl/server.crt -extensions v3_ca'
+#   args:
+#     creates: /etc/nginx/ssl/server.crt
+#   notify: restart nginx
+
+- name: Allow http(s) traffic through firewall
+  ufw: rule=allow port={{item}}
+  with_items:
+    - 80
+    - 443
