@@ -17,3 +17,9 @@
 
 # - name: tmp allow direct
 #   ufw: rule=allow port=943
+
+# NOTE: if you are unable to connect to the openVPN server after this playbook runs, try running, on the server,
+# sudo /usr/local/openvpn_as/bin/ovpn-init --force
+# Go through the install process and leave everything as default, except tell it to
+# listen on all interfaces (0.0.0.0) instead of just the default one. Not sure if this is necessary or
+# not but worth a shot.
