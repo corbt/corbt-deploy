@@ -26,13 +26,6 @@
   file: dest={{seafile.dir}}/seafile-server-latest src={{seafile.dir}}/seafile-server-{{seafile.version}} state=link
   sudo_user: seafile
 
-- name: Place seafile SSL certificates
-  copy: src={{item}} dest=/etc/nginx/ssl/{{item}} owner=root group=root
-  with_items:
-    - sf.corbt.com.crt
-    - sf.corbt.com.key
-  notify: restart nginx
-
 - name: Add seafile nginx conf
   template: src=seafile-nginx.conf.j2 dest=/etc/nginx/sites-enabled/seafile.conf
   notify: restart nginx

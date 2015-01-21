@@ -14,3 +14,6 @@
 
 - name: Open the tunnel port
   ufw: rule=allow proto=udp port=1194
+
+# - name: tmp allow direct
+#   ufw: rule=allow port=943
